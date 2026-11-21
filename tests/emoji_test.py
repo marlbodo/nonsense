@@ -1,0 +1,37 @@
+import os as _os
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+ROOT_DIR = _os.path.abspath(_os.path.join(_HERE, ".."))
+OUT_DIR = _os.path.join(_HERE, "out")
+CHROME = _os.environ.get("CHROME", "/usr/bin/google-chrome")
+import subprocess, sys, time
+from playwright.sync_api import sync_playwright
+srv = subprocess.Popen([sys.executable, "-m", "http.server", "8790", "--bind", "127.0.0.1"], cwd=ROOT_DIR, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(1)
+res=[]
+def chk(n,c): res.append(c); print("PASS" if c else "FAIL", n)
+with sync_playwright() as p:
+    b=p.chromium.launch(executable_path=CHROME,args=["--no-sandbox"])
+    ctx=b.new_context(viewport={"width":1100,"height":800})
+    pg=ctx.new_page(); errs=[]
+    pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("console",lambda m: errs.append(m.text) if m.type=="error" and "supabase" not in m.text and "Failed to load" not in m.text and "net::" not in m.text else None)
+    pg.route("**/functions/v1/**",lambda r:r.fulfill(status=200,content_type="application/json",body="{}"))
+    pg.goto("http://localhost:8790/write.html")
+    btn=pg.locator("#write-form .emoji-btn")
+    chk("PC에서 😀 버튼 보임", btn.is_visible())
+    chk("처음엔 패널 닫힘", not pg.locator(".emoji-panel").is_visible())
+    pg.fill("#body","안녕 세상"); pg.locator("#body").evaluate("e=>e.setSelectionRange(2,2)")
+    btn.click(); chk("패널 열림", pg.locator(".emoji-panel").is_visible())
+    pg.locator(".emoji-item").nth(1).click()
+    v=pg.input_value("#body"); chk("커서 위치에 삽입: "+v, v=="안녕😂 세상")
+    chk("글자수 카운터 갱신", pg.inner_text("#body-count").startswith(str(len(v.encode("utf-16-le")) // 2)))
+    chk("삽입 후에도 패널 유지(여러 개 입력)", pg.locator(".emoji-panel").is_visible())
+    pg.keyboard.press("Escape"); chk("Esc로 닫힘", not pg.locator(".emoji-panel").is_visible())
+    btn.click(); pg.mouse.click(900,100); chk("바깥 클릭으로 닫힘", not pg.locator(".emoji-panel").is_visible())
+    pg.screenshot(path="/tmp/emoji_pc.png")
+    btn.click(); pg.screenshot(path="/tmp/emoji_pc_open.png")
+    chk("콘솔 오류 없음", not errs)
+    m=b.new_context(viewport={"width":390,"height":800},has_touch=True,is_mobile=True,device_scale_factor=2)
+    mp=m.new_page(); mp.goto("http://localhost:8790/write.html")
+    chk("모바일에서는 버튼 숨김", not mp.locator(".emoji-btn").is_visible())
+    b.close()
+srv.terminate()
+print(sum(res),"/",len(res))
