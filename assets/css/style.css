@@ -76,8 +76,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, .btn:focus-vi
 .post-item { border-bottom: 1px solid var(--line); }
 .post-item > a { display: block; padding: 14px 2px; }
 .post-item > a:hover { background: var(--card); text-decoration: none; }
-.post-item .row1 { display: flex; gap: 8px; align-items: baseline; }
-.post-item .no { min-width: 2.4em; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.post-item .row1 { display: flex; gap: 6px; align-items: baseline; }
+.post-item .no { min-width: 1.3em; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
 .post-item .title { font-weight: 700; font-size: 1.05rem; flex: 1; min-width: 0; }
 .post-item .preview {
   margin: 4px 0 6px 0; color: var(--muted); font-size: .92rem;
