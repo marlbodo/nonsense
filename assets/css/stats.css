@@ -1,0 +1,91 @@
+/* 방문 통계 — 팔레트: dataviz 기본(검증 완료). 색은 의미(지표)에 고정되고 순위로 바뀌지 않는다. */
+.viz-root {
+  --s1: #2a78d6; /* 방문 */
+  --s2: #eb6834; /* 페이지뷰 */
+  --s3: #1baf7a; /* 추천 */
+  --s4: #eda100; /* 비추천 */
+  --s6: #008300; /* 신규 글 */
+  --s7: #6250d6; /* 신규 댓글 */
+  --grid: #e1e0d9; --axis: #c3c2b7;
+  --up: #006300; --down: #d03b3b;
+}
+.viz-title { font-size: 1.25rem; margin: 4px 0 12px; }
+.viz-root h2 { font-size: 1.05rem; margin: 28px 0 10px; }
+.viz-root h3 { font-size: .98rem; margin: 0; }
+.small { font-size: .82rem; margin: 2px 0 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 기간 필터: 차트 위 한 줄 */
+.range-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+#content { transition: none; }
+#content.loading { opacity: .55; }
+
+/* 지표 카드 */
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.tile { padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+.t-label { font-size: .82rem; color: var(--muted); }
+.t-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; margin-top: 2px; }
+
+/* 증감·판정 */
+.verdicts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.verdict { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; font-weight: 700; }
+.verdict .muted { font-weight: 400; font-size: .85rem; }
+.g-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.g-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.g-label { font-size: .92rem; }
+.g-vals { grid-column: 1; font-size: .85rem; }
+.g-row .delta { grid-column: 2; grid-row: 1 / span 2; }
+.delta { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.delta.up, .verdict.up { color: var(--up); }
+.delta.down, .verdict.down { color: var(--down); }
+.delta.flat, .verdict.flat, .verdict.none { color: var(--muted); }
+
+/* 차트 카드 */
+.viz-card { margin: 10px 0 14px; padding: 12px 12px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+.viz-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; padding: 0; font-size: .85rem; }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.key { display: inline-block; flex: none; }
+.key.line { width: 14px; height: 2px; border-radius: 1px; }
+.key.box { width: 10px; height: 10px; border-radius: 2px; }
+.k1 { background: var(--s1); } .k2 { background: var(--s2); } .k3 { background: var(--s3); }
+.k4 { background: var(--s4); } .k6 { background: var(--s6); } .k7 { background: var(--s7); }
+.plot { position: relative; margin-top: 8px; }
+.plot .empty { padding: 24px 8px; text-align: center; margin: 0; }
+svg.chart { display: block; max-width: 100%; touch-action: pan-y; outline-offset: 2px; user-select: none; -webkit-user-select: none; }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { stroke: var(--axis); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font-size: 11px; }
+.chart .lbl { fill: var(--fg); font-size: 11px; font-weight: 600; }
+.chart .xhair { stroke: var(--axis); stroke-width: 1; }
+.chart .line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chart .dot { stroke-width: 0; }
+.chart .ring { stroke: var(--bg); stroke-width: 2; }
+.chart .bar.hot { opacity: .78; }
+.l1 { stroke: var(--s1); } .l2 { stroke: var(--s2); } .l3 { stroke: var(--s3); }
+.l4 { stroke: var(--s4); } .l6 { stroke: var(--s6); } .l7 { stroke: var(--s7); }
+.f1 { fill: var(--s1); } .f2 { fill: var(--s2); } .f3 { fill: var(--s3); }
+.f4 { fill: var(--s4); } .f6 { fill: var(--s6); } .f7 { fill: var(--s7); }
+.viz-tip { position: absolute; top: 2px; z-index: 5; min-width: 120px; padding: 8px 10px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0, 0, 0, .18); font-size: .85rem; pointer-events: none; }
+.tip-h { color: var(--muted); font-size: .8rem; margin-bottom: 4px; }
+.tip-r { display: flex; align-items: center; gap: 8px; line-height: 1.7; }
+.tip-r strong { font-size: .95rem; font-variant-numeric: tabular-nums; }
+.tablewrap { max-height: 320px; overflow: auto; margin: 8px 0 4px; }
+table.vt { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.vt th, .vt td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+.vt th[scope=row], .vt thead th:first-child { text-align: left; font-weight: 500; }
+.vt thead th { position: sticky; top: 0; background: var(--bg); color: var(--muted); font-weight: 500; }
+
+/* 순위 막대 */
+.ranked { list-style: none; margin: 8px 0 0; padding: 0; }
+.ranked li { padding: 7px 0; }
+.r-top { display: flex; justify-content: space-between; gap: 10px; font-size: .92rem; }
+.r-top a { min-width: 0; }
+.r-top strong { font-variant-numeric: tabular-nums; }
+.r-track { height: 8px; margin-top: 4px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+.r-fill { height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; }
+
+.basis { margin: 8px 0 0; padding-left: 18px; font-size: .88rem; color: var(--muted); }
+.basis li { margin: 4px 0; }
+
+@media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, 1fr); } }

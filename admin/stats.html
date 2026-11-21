@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://aunukepmqpavuujypfks.supabase.co; base-uri 'none'; form-action 'self'">
+  <meta name="robots" content="noindex,nofollow">
+  <title>방문 통계 - 관리자</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%98%88%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/stats.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <main class="container viz-root" id="stats">
+    <h1 class="viz-title">방문 통계</h1>
+    <div class="range-row" role="group" aria-label="기간 선택" id="range-row"></div>
+    <div id="content" aria-live="polite"><p class="notice">불러오는 중…</p></div>
+  </main>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script src="../assets/js/stats.js"></script>
+</body>
+</html>
