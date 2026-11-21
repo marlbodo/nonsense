@@ -123,8 +123,8 @@ for (const p of posts) {
 
 // 2) 목록(홈): 메타 + 스크립트가 꺼진 환경(검색 로봇 포함)용 최신 글 링크
 let home = await readFile(path.join(ROOT, "index.html"), "utf8");
-home = setTitle(home, `${NAME} - 익명 헛소리 게시판`);
-home = addHead(home, headMeta({ title: `${NAME} - 익명 헛소리 게시판`, desc: DESC_SITE, url: `${SITE}/` }));
+home = setTitle(home, NAME);
+home = addHead(home, headMeta({ title: NAME, desc: DESC_SITE, url: `${SITE}/` }));
 if (posts.length) {
   const items = posts.slice(0, 100).map((p) => `<li><a href="p/${p.id}/">${esc(squash(p.title))}</a></li>`).join("");
   home = home.replace("</body>", () => `  <noscript><nav aria-label="최신 글"><h2>최신 글</h2><ul>${items}</ul></nav></noscript>\n</body>`);
