@@ -105,7 +105,6 @@ for (const p of posts) {
   });
   const paragraphs = String(p.body).replace(/\r\n?/g, "\n").split(/\n{2,}/).map((t) => `<p>${esc(t).replace(/\n/g, "<br>")}</p>`).join("\n    ");
   const pre = [
-    `<a class="back" href="../../index.html">← 목록</a>`,
     `<article class="post">`,
     `  <h1 class="post-title">${esc(p.title)}</h1>`,
     `  <div class="post-meta"><span>${esc(p.nickname)}</span> · <span>${esc(String(p.created_at).slice(0, 10))}</span></div>`,

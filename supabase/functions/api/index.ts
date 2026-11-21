@@ -59,9 +59,11 @@ const KNOWN_DB_ERRORS: Record<string, [number, string]> = {
   target_not_available: [404, "target_not_available"],
   target_not_found: [404, "target_not_found"],
   invalid_vote: [400, "invalid_vote"],
+  reply_too_deep: [400, "reply_too_deep"],
 };
 function dbFail(error: { message?: string; code?: string }): never {
   const msg = String(error?.message ?? "");
+  if (error?.code === "23503") throw new HttpError(409, "has_replies"); // 답글이 달린 글은 영구 삭제 불가
   for (const k of Object.keys(KNOWN_DB_ERRORS)) {
     if (msg.includes(k)) throw new HttpError(...KNOWN_DB_ERRORS[k]);
   }
@@ -229,7 +231,8 @@ async function getPost(req: Request, id: string): Promise<Out> {
   if (!rows?.length) throw new HttpError(404, "not_found");
   const post = rows[0];
   const comments = post.status === "hidden" ? [] : await rpc("api_get_comments", { p_post_id: id });
-  return ok({ post, comments });
+  const replies = await rpc("api_get_replies", { p_post_id: id });
+  return ok({ post, comments, replies });
 }
 
 async function createPost(req: Request): Promise<Out> {
@@ -241,6 +244,7 @@ async function createPost(req: Request): Promise<Out> {
     p_title: text(b.title, "title", 1, 100),
     p_body: text(b.body, "body", 1, 10000, true),
     p_password: password(b.password),
+    p_reply_to: b.reply_to_id == null ? null : uuid(b.reply_to_id, "reply_to_id"),
   });
   return ok({ id }, 201);
 }
@@ -455,6 +459,8 @@ async function adminMutate(req: Request, kind: "post" | "comment", id: string, a
       const b = await readJson(req);
       if (b.confirm !== true) throw new HttpError(400, "confirm_required");
       if (kind === "post") {
+        const { count } = await db.from("posts").select("id", { count: "exact", head: true }).eq("reply_to_id", id);
+        if ((count ?? 0) > 0) throw new HttpError(409, "has_replies");
         await purgeImage(id);
       } else {
         const { data: c } = await db.from("comments").select("parent_id").eq("id", id).maybeSingle();

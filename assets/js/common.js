@@ -52,6 +52,7 @@
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     "chevron-down": '<path d="m6 9 6 6 6-6"/>',
     "chevron-up": '<path d="m18 15-6-6-6 6"/>',
+    "arrow-left": '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
     "corner-down-right": '<polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>',
     "trending-up": '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
     "trending-down": '<path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/>',
@@ -139,7 +140,9 @@
     invalid_title: "제목은 1~100자로 입력해 주세요.",
     invalid_body: "내용을 확인해 주세요. (글 10,000자, 댓글 2,000자 이내)",
     not_found: "존재하지 않거나 볼 수 없는 항목입니다.",
-    post_not_available: "삭제되었거나 숨겨진 글에는 댓글을 달 수 없습니다.",
+    post_not_available: "삭제되었거나 숨겨진 글에는 댓글이나 답글을 달 수 없습니다.",
+    reply_too_deep: "답글이 너무 깊게 이어졌습니다. 원글에 새 글로 써 주세요.",
+    has_replies: "답글 글이 달린 글은 영구 삭제할 수 없습니다. 삭제(숨김)로 처리해 주세요.",
     unsupported_image: "JPG, PNG, WebP 이미지만 올릴 수 있습니다.",
     invalid_file_size: "이미지는 1MB 이하여야 합니다.",
     too_large: "파일이 너무 큽니다. (1MB 이하)",
@@ -285,12 +288,23 @@
   };
 
   // ---------- 헤더 ----------
-  NS.renderHeader = function (base = "") {
+  // 뒤로: 방금 보던 목록(검색·정렬·페이지 그대로)으로. 목록에서 온 게 아니면(검색 결과 등 외부 유입) 메인으로.
+  NS.goBack = function (base = "") {
+    let same = false;
+    try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* ignore */ }
+    if (same && history.length > 1) history.back();
+    else location.href = base + "index.html";
+  };
+
+  NS.renderHeader = function (base = "", opts = {}) {
     const el = document.getElementById("site-header");
     if (!el) return;
     const inner = h("div", { class: "container header-inner" }, h("a", { class: "site-title", href: base + "index.html", text: "😈 헛소리 대마왕" }));
+    const right = h("div", { class: "header-actions" });
+    if (opts.back) right.append(h("button", { type: "button", class: "btn small back-btn", onclick: () => NS.goBack(base) }, NS.icon("arrow-left", 14), "뒤로"));
+    inner.append(right);
     if (NS.isAdmin()) {
-      inner.append(h("div", { class: "admin-bar" },
+      right.append(h("div", { class: "admin-bar" },
         h("span", { class: "badge", text: "관리자" }),
         h("button", {
           type: "button", class: "btn small", text: "로그아웃",

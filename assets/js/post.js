@@ -6,7 +6,6 @@
   const id = params.get("id") || ((location.pathname.match(/\/p\/([0-9a-f-]{36})/i) || [])[1]) || "";
   const root = document.getElementById("post-root");
   const ROOT = document.documentElement.getAttribute("data-root") || ""; // 정적 페이지(/p/<id>/)에서는 "../../"
-  const backLink = () => h("a", { class: "back", href: ROOT + "index.html", text: "← 목록" });
   let data = null;
   let editing = null; // { pw }
   let tracked = false;
@@ -47,7 +46,7 @@
       data = ADMIN ? fromAdmin(await api("/admin/posts/" + id, { admin: true })) : await api("/posts/" + id);
     } catch (e) {
       if (ADMIN && e.status === 401) { location.reload(); return; }
-      root.replaceChildren(backLink(), e.code === "not_found"
+      root.replaceChildren(e.code === "not_found"
         ? h("div", { class: "notice", text: "존재하지 않는 게시글입니다." })
         : NS.errorBox(e, () => load(false)));
       return;
@@ -60,9 +59,26 @@
   function render() {
     const p = data.post;
     document.title = p.status === "visible" ? p.title + " - 헛소리 대마왕" : "헛소리 대마왕";
-    const parts = [backLink(), postSection(p)];
+    const parts = [postSection(p)];
+    if (data.replies && data.replies.length) parts.push(repliesSection(data.replies));
     if (p.status !== "hidden") parts.push(commentsSection(p));
     root.replaceChildren(...parts);
+  }
+
+  // ---------- 이 글에 달린 답글 글 (직속 답글만 한 번 들여쓰고, 더 깊은 답글도 같은 위치에 "@대상"으로 표시) ----------
+  function repliesSection(list) {
+    return h("section", { class: "replies-box", "aria-label": "답글 글" },
+      h("h2", { text: `답글 글 ${list.length}` }),
+      h("ul", { class: "post-list" }, list.map((r) => h("li", { class: "post-item reply" },
+        h("a", { href: ROOT + "post.html?id=" + encodeURIComponent(r.id) },
+          h("div", { class: "row1" }, h("span", { class: "title", text: r.title }), r.has_image ? h("span", { class: "muted", title: "이미지 첨부" }, icon("image", 16)) : null),
+          h("p", { class: "preview", text: (r.preview || "").replace(/\s+/g, " ").trim() }),
+          h("div", { class: "meta" },
+            h("span", { class: "to" }, icon("corner-down-right", 13), " @" + (r.reply_to_nickname || "삭제된 글")),
+            h("span", { text: r.nickname }),
+            h("span", { text: NS.fmtDate(r.created_at) }),
+            h("span", { class: "stat", title: "추천" }, icon("thumbs-up", 14), String(r.up_count)),
+            h("span", { class: "stat", title: "댓글" }, icon("message-circle", 14), String(r.comment_count))))))));
   }
 
   // ---------- 추천/비추천 ----------
@@ -97,6 +113,12 @@
       art.append(h("div", { class: "post-state", text: p.status === "deleted"
         ? "삭제된 글입니다. (일반 방문자에게는 '삭제된 게시글입니다'만 보입니다)"
         : "숨김 처리된 글입니다. (일반 방문자에게는 보이지 않습니다)" }));
+    }
+    if (p.reply_to_id) {
+      const target = p.reply_to_status === "visible"
+        ? [h("a", { href: ROOT + "post.html?id=" + encodeURIComponent(p.reply_to_id), text: p.reply_to_title }), " 글에 대한 답글 ", h("span", { class: "to" }, icon("corner-down-right", 13), " @" + p.reply_to_nickname)]
+        : ["삭제되었거나 숨겨진 글에 대한 답글입니다."];
+      art.append(h("p", { class: "reply-line" }, ...target));
     }
     art.append(
       h("h1", { class: "post-title", text: p.title }),
@@ -145,6 +167,7 @@
   function actionBar(p) {
     const url = canonicalUrl();
     return h("div", { class: "bar-actions" },
+      h("a", { class: "btn text", href: ROOT + "write.html?reply_to=" + encodeURIComponent(p.id) }, icon("corner-down-right", 14), "답글 쓰기"),
       h("button", { type: "button", class: "btn text", onclick: () => editPost(p) }, icon("pencil", 14), "수정"),
       h("button", { type: "button", class: "btn text", onclick: () => deletePost(p) }, icon("trash-2", 14), "삭제"),
       h("button", { type: "button", class: "btn text", onclick: () => NS.report("post", p.id) }, icon("flag", 14), "신고"),
@@ -447,9 +470,9 @@
     });
   }
 
-  NS.renderHeader(ROOT);
+  NS.renderHeader(ROOT, { back: true });
   if (!UUID.test(id)) {
-    root.replaceChildren(backLink(), h("div", { class: "notice", text: "존재하지 않는 게시글입니다." }));
+    root.replaceChildren(h("div", { class: "notice", text: "존재하지 않는 게시글입니다." }));
   } else {
     load(false);
   }
