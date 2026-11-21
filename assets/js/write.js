@@ -22,6 +22,7 @@
   }
   NS.track(null);
   $("nickname").value = NS.store.get("nv_nick") || "";
+  $("body").closest("label").after(NS.emojiBar($("body")));
   $("body").addEventListener("input", () => { $("body-count").textContent = $("body").value.length + " / 10000"; });
 
   function showMsg(text, isError, link) {

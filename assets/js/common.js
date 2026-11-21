@@ -190,6 +190,31 @@
     NS.store.set("nv_votes", JSON.stringify(m));
   };
 
+  // ---------- 이모지 (PC 전용 😀 버튼. 모바일은 키보드 자체 이모지를 쓴다) ----------
+  const EMOJIS = ["😀","😂","🤣","😊","😍","😘","😎","🤔","😅","😭","😡","🥲","😴","🤯","🥳","😇","🙄","😏","😱","🤪","🥺","😤","🤗","🤮",
+    "👍","👎","👏","🙏","💪","🤝","✌️","🙌","👀","🔥","💯","✨","💩","💀","👻","😈","❤️","💔","💜","🎉","🍜","🍺","☕","🍕","🐶","🐱","🐸","🌈"];
+  NS.emojiBar = function (ta) {
+    const panel = h("div", { class: "emoji-panel", role: "group", "aria-label": "이모지", hidden: true });
+    const btn = h("button", { type: "button", class: "emoji-btn", "aria-label": "이모지 입력", "aria-expanded": "false", title: "이모지", text: "😀" });
+    const bar = h("div", { class: "emoji-bar" }, btn, panel);
+    const close = () => { panel.hidden = true; btn.setAttribute("aria-expanded", "false"); document.removeEventListener("pointerdown", outside, true); document.removeEventListener("keydown", onKey, true); };
+    const outside = (e) => { if (!bar.contains(e.target)) close(); };
+    const onKey = (e) => { if (e.key === "Escape") { close(); e.stopPropagation(); } };
+    EMOJIS.forEach((em) => panel.append(h("button", { type: "button", class: "emoji-item", text: em, "aria-label": em, onclick: () => {
+      const max = ta.maxLength > 0 ? ta.maxLength : Infinity;
+      if (ta.value.length + em.length > max) return;
+      const s = ta.selectionStart == null ? ta.value.length : ta.selectionStart, e = ta.selectionEnd == null ? s : ta.selectionEnd;
+      ta.setRangeText(em, s, e, "end");
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+      ta.focus();
+    } })));
+    btn.addEventListener("click", () => {
+      if (panel.hidden) { panel.hidden = false; panel.classList.toggle("up", bar.getBoundingClientRect().bottom + 230 > window.innerHeight && bar.getBoundingClientRect().top > 230); btn.setAttribute("aria-expanded", "true"); document.addEventListener("pointerdown", outside, true); document.addEventListener("keydown", onKey, true); }
+      else close();
+    });
+    return bar;
+  };
+
   // ---------- 알림 ----------
   NS.toast = function (msg) {
     let t = document.getElementById("toast");

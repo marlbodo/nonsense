@@ -205,7 +205,7 @@
     const cancel = h("button", { type: "button", class: "btn", text: "취소", onclick: () => { editing = null; render(); } });
     const form = h("form", { class: "editor" },
       h("label", { class: "field" }, h("span", { text: "제목" }), title),
-      h("label", { class: "field" }, h("span", { text: "내용" }), body),
+      h("label", { class: "field" }, h("span", { text: "내용" }), body), NS.emojiBar(body),
       delImg ? h("label", { class: "field" }, delImg, " 첨부 이미지 삭제") : null,
       file ? h("label", { class: "field" }, h("span", { text: "이미지 첨부 (선택, 5MB 이하)" }), file) : null,
       h("div", { class: "actions" }, cancel, save));
@@ -252,7 +252,7 @@
     const ta = h("textarea", { rows: 3, maxlength: 2000, required: true, placeholder: parent ? "답글을 입력하세요" : "댓글을 입력하세요", "aria-label": "내용" });
     const btn = h("button", { type: "submit", class: "btn primary", text: "등록" });
     const form = h("form", { class: "cform" },
-      h("div", { class: "row2" }, nick, pw), ta,
+      h("div", { class: "row2" }, nick, pw), ta, NS.emojiBar(ta),
       h("div", { class: "actions" }, onCancel ? h("button", { type: "button", class: "btn", text: "취소", onclick: onCancel }) : null, btn));
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -352,7 +352,7 @@
     ta.value = c.body;
     const save = h("button", { type: "button", class: "btn primary small", text: "저장" });
     const cancel = h("button", { type: "button", class: "btn small", text: "취소" });
-    const box = h("div", { class: "editor" }, ta, h("div", { class: "actions" }, cancel, save));
+    const box = h("div", { class: "editor" }, ta, NS.emojiBar(ta), h("div", { class: "actions" }, cancel, save));
     bodyEl.replaceWith(box);
     cancel.addEventListener("click", () => box.replaceWith(bodyEl));
     save.addEventListener("click", async () => {
@@ -460,7 +460,7 @@
     ta.value = c.body;
     const save = h("button", { type: "button", class: "btn primary small", text: "저장" });
     const cancel = h("button", { type: "button", class: "btn small", text: "취소" });
-    const box = h("div", { class: "editor" }, ta, h("div", { class: "actions" }, cancel, save));
+    const box = h("div", { class: "editor" }, ta, NS.emojiBar(ta), h("div", { class: "actions" }, cancel, save));
     bodyEl.replaceWith(box);
     cancel.addEventListener("click", () => box.replaceWith(bodyEl));
     save.addEventListener("click", async () => {
