@@ -143,9 +143,9 @@
     post_not_available: "삭제되었거나 숨겨진 글에는 댓글이나 답글을 달 수 없습니다.",
     reply_too_deep: "답글이 너무 깊게 이어졌습니다. 원글에 새 글로 써 주세요.",
     has_replies: "답글이 달린 글은 영구 삭제할 수 없습니다. 삭제(숨김)로 처리해 주세요.",
-    unsupported_image: "JPG, PNG, WebP 이미지만 올릴 수 있습니다.",
-    invalid_file_size: "이미지는 1MB 이하여야 합니다.",
-    too_large: "파일이 너무 큽니다. (1MB 이하)",
+    unsupported_image: "JPG, PNG, GIF, WebP 이미지만 올릴 수 있습니다.",
+    invalid_file_size: "이미지는 5MB 이하여야 합니다.",
+    too_large: "파일이 너무 큽니다. (5MB 이하)",
     image_already_attached: "이미 첨부된 이미지가 있습니다.",
     unauthorized: "관리자 로그인이 필요합니다.",
     admin_not_configured: "관리자 비밀번호가 아직 설정되지 않았습니다.",
@@ -276,8 +276,9 @@
   // ---------- 이미지 ----------
   NS.checkImage = function (file) {
     if (!file) return null;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return "unsupported_image";
-    if (file.size < 1 || file.size > 1048576) return "invalid_file_size";
+    const okType = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type) || /\.(jpe?g|png|gif|webp)$/i.test(file.name || "");
+    if (!okType) return "unsupported_image";
+    if (file.size < 1 || file.size > 5242880) return "invalid_file_size";
     return null;
   };
   NS.uploadImage = function (postId, password, file) {

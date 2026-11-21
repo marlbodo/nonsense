@@ -133,18 +133,12 @@ function sourceOf(ref?: string): string {
 const ascii = (b: Uint8Array, s: number, e: number) => String.fromCharCode(...b.slice(s, e));
 function sniffImage(b: Uint8Array): { mime: string; ext: string } | null {
   if (b.length < 16) return null;
-  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) {
-    const tail = b.slice(-64);
-    for (let i = 0; i < tail.length - 1; i++) if (tail[i] === 0xff && tail[i + 1] === 0xd9) return { mime: "image/jpeg", ext: "jpg" };
-    return null;
-  }
-  if (b[0] === 0x89 && ascii(b, 1, 4) === "PNG" && b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a) {
-    return ascii(b, b.length - 8, b.length - 4) === "IEND" ? { mime: "image/png", ext: "png" } : null;
-  }
-  if (ascii(b, 0, 4) === "RIFF" && ascii(b, 8, 12) === "WEBP") {
-    const size = b[4] | (b[5] << 8) | (b[6] << 16) | (b[7] << 24);
-    return size + 8 === b.length || size + 9 === b.length ? { mime: "image/webp", ext: "webp" } : null;
-  }
+  // 매직 바이트(파일 머리)만 확인한다. 카카오톡·카메라 앱 등은 파일 끝에 여분 데이터를 붙이는 경우가 많아
+  // 끝부분 검사는 하지 않는다. 저장 시 content-type 을 고정하고 비공개 버킷+서명 URL 로만 내려주므로 안전하다.
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return { mime: "image/jpeg", ext: "jpg" };
+  if (b[0] === 0x89 && ascii(b, 1, 4) === "PNG" && b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a) return { mime: "image/png", ext: "png" };
+  if (ascii(b, 0, 6) === "GIF87a" || ascii(b, 0, 6) === "GIF89a") return { mime: "image/gif", ext: "gif" };
+  if (ascii(b, 0, 4) === "RIFF" && ascii(b, 8, 12) === "WEBP") return { mime: "image/webp", ext: "webp" };
   return null;
 }
 
@@ -346,12 +340,12 @@ async function imageUrl(req: Request, id: string): Promise<Out> {
 
 async function uploadImage(req: Request, id: string): Promise<Out> {
   const len = Number(req.headers.get("content-length") ?? "0");
-  if (len > 1_400_000) throw new HttpError(413, "too_large");
+  if (len > 5_600_000) throw new HttpError(413, "too_large");
   await limit(req, "upload", 3600, 5);
   await checkPwLimits(req, id);
   const form = await req.formData().catch(() => { throw new HttpError(400, "invalid_form"); });
   const file = form.get("file");
-  if (!(file instanceof File) || file.size < 1 || file.size > 1_048_576) throw new HttpError(413, "invalid_file_size");
+  if (!(file instanceof File) || file.size < 1 || file.size > 5_242_880) throw new HttpError(413, "invalid_file_size");
   const pw = password(form.get("password"));
   if (!(await rpc("api_check_password", { p_kind: "post", p_id: id, p_password: pw }))) throw new HttpError(403, "wrong_password");
   if (!(await visiblePost(id))) throw new HttpError(404, "not_found");

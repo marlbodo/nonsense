@@ -200,14 +200,14 @@
     body.value = p.body;
     const asAdmin = !!editing.admin;
     const delImg = p.has_image && !asAdmin ? h("input", { type: "checkbox" }) : null;
-    const file = p.has_image || asAdmin ? null : h("input", { type: "file", accept: "image/jpeg,image/png,image/webp" });
+    const file = p.has_image || asAdmin ? null : h("input", { type: "file", accept: "image/jpeg,image/png,image/gif,image/webp" });
     const save = h("button", { type: "submit", class: "btn primary", text: "저장" });
     const cancel = h("button", { type: "button", class: "btn", text: "취소", onclick: () => { editing = null; render(); } });
     const form = h("form", { class: "editor" },
       h("label", { class: "field" }, h("span", { text: "제목" }), title),
       h("label", { class: "field" }, h("span", { text: "내용" }), body),
       delImg ? h("label", { class: "field" }, delImg, " 첨부 이미지 삭제") : null,
-      file ? h("label", { class: "field" }, h("span", { text: "이미지 첨부 (선택, 1MB 이하)" }), file) : null,
+      file ? h("label", { class: "field" }, h("span", { text: "이미지 첨부 (선택, 5MB 이하)" }), file) : null,
       h("div", { class: "actions" }, cancel, save));
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
