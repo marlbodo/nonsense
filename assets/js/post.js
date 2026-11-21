@@ -264,7 +264,7 @@
 
   const countDesc = (c, m) => (m.get(c.id) || []).reduce((n, k) => n + 1 + countDesc(k, m), 0);
 
-  // 깊이 0,1,2 까지 들여쓰고, 그 아래 답글은 같은 들여쓰기에서 "→ @대상" 으로 표시
+  // 최상위 댓글(깊이 0)의 직속 답글만 한 번 들여쓰고, 그보다 깊은 답글은 같은 들여쓰기에서 "→ @대상" 으로 표시
   function commentNode(c, depth, byParent) {
     const kids = byParent.get(c.id) || [];
     const visible = c.status === "visible";
@@ -275,7 +275,7 @@
       head.append(h("strong", { text: c.nickname }), h("span", { class: "muted", text: NS.fmtDate(c.created_at, true) }));
       if (!visible) head.append(h("span", { class: "badge", text: c.status === "deleted" ? "삭제됨" : "숨김" }));
       if (wasEdited(c)) head.append(h("span", { class: "muted", text: "(수정됨)" }));
-      if (depth > 2) head.append(h("span", { class: "to" }, icon("corner-down-right", 13), " @" + (c.reply_to_nickname || "삭제된 댓글")));
+      if (depth > 1) head.append(h("span", { class: "to" }, icon("corner-down-right", 13), " @" + (c.reply_to_nickname || "삭제된 댓글")));
     } else {
       head.append(h("span", { text: c.status === "deleted" ? "삭제된 댓글입니다." : "관리자에 의해 숨김 처리된 댓글입니다." }));
     }
@@ -305,7 +305,7 @@
 
     let wrap = null;
     if (kids.length) {
-      wrap = h("div", { class: "replies" + (depth >= 2 ? " flat" : "") }, kids.map((k) => commentNode(k, depth + 1, byParent)));
+      wrap = h("div", { class: "replies" + (depth >= 1 ? " flat" : "") }, kids.map((k) => commentNode(k, depth + 1, byParent)));
       const n = countDesc(c, byParent);
       const cbtn = h("button", { type: "button", class: "btn text", "aria-expanded": "true" }, icon("chevron-up", 14), h("span", { text: `답글 ${n}개 접기` }));
       cbtn.addEventListener("click", () => {
