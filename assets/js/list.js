@@ -35,8 +35,8 @@
     document.getElementById("write-btn").prepend(icon("plus", 16));
   }
 
-  // 목록 한 줄. 원글은 번호, 답글 글은 번호 없이 한 번만 들여쓰고(모든 깊이 같은 위치) "@대상"을 표시한다.
-  // 검색 결과에서는 평평하게 보여 주고 답글 글에는 @대상만 붙인다.
+  // 목록 한 줄. 원글은 번호, 답글은 번호 없이 한 번만 들여쓰고(모든 깊이 같은 위치) "@대상"을 표시한다.
+  // 검색 결과에서는 평평하게 보여 주고 답글에는 @대상만 붙인다.
   function item(p, flat) {
     const isReply = p.reply_depth > 0;
     const href = "post.html?id=" + encodeURIComponent(p.id);
@@ -46,7 +46,7 @@
           h("div", { class: "row1" },
             h("span", { class: "no", text: String(p.display_no) }),
             h("span", { class: "title muted", text: p.placeholder === "deleted" ? "삭제된 글입니다." : "관리자에 의해 숨김 처리된 글입니다." })),
-          p.reply_count ? h("div", { class: "meta" }, h("span", { class: "stat", title: "답글 글" }, icon("corner-down-right", 14), String(p.reply_count))) : null));
+          p.reply_count ? h("div", { class: "meta" }, h("span", { class: "stat", title: "답글" }, icon("corner-down-right", 14), String(p.reply_count))) : null));
     }
     const to = isReply ? h("span", { class: "to" }, icon("corner-down-right", 13), " @" + (p.reply_to_nickname || "삭제된 글")) : null;
     return h("li", { class: "post-item" + (isReply && !flat ? " reply" : "") },
@@ -63,10 +63,10 @@
           h("span", { class: "stat", title: "추천" }, icon("thumbs-up", 14), String(p.up_count)),
           h("span", { class: "stat", title: "비추천" }, icon("thumbs-down", 14), String(p.down_count)),
           h("span", { class: "stat", title: "댓글" }, icon("message-circle", 14), String(p.comment_count)),
-          !isReply && p.reply_count ? h("span", { class: "stat", title: "답글 글" }, icon("corner-down-right", 14), String(p.reply_count)) : null)));
+          !isReply && p.reply_count ? h("span", { class: "stat", title: "답글" }, icon("corner-down-right", 14), String(p.reply_count)) : null)));
   }
 
-  // 원글 아래에 붙은 답글 글들. 한 원글에서 목록에 보이는 답글은 최대 30개이고 나머지는 원글에서 본다.
+  // 원글 아래에 붙은 답글들. 한 원글에서 목록에 보이는 답글은 최대 30개이고 나머지는 원글에서 본다.
   function rows(posts) {
     if (q) return posts.map((p) => item(p, true));
     const out = [];
@@ -74,7 +74,7 @@
     const flush = () => {
       if (cur && cur.reply_count > 30) {
         out.push(h("li", { class: "post-item reply more" },
-          h("a", { href: "post.html?id=" + encodeURIComponent(cur.id), text: `답글 글 ${cur.reply_count - 30}개 더 보기` })));
+          h("a", { href: "post.html?id=" + encodeURIComponent(cur.id), text: `답글 ${cur.reply_count - 30}개 더 보기` })));
       }
     };
     for (const p of posts) {

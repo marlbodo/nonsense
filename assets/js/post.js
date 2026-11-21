@@ -65,10 +65,10 @@
     root.replaceChildren(...parts);
   }
 
-  // ---------- 이 글에 달린 답글 글 (직속 답글만 한 번 들여쓰고, 더 깊은 답글도 같은 위치에 "@대상"으로 표시) ----------
+  // ---------- 이 글에 달린 답글 (직속 답글만 한 번 들여쓰고, 더 깊은 답글도 같은 위치에 "@대상"으로 표시) ----------
   function repliesSection(list) {
-    return h("section", { class: "replies-box", "aria-label": "답글 글" },
-      h("h2", { text: `답글 글 ${list.length}` }),
+    return h("section", { class: "replies-box", "aria-label": "답글" },
+      h("h2", { text: `답글 ${list.length}` }),
       h("ul", { class: "post-list" }, list.map((r) => h("li", { class: "post-item reply" },
         h("a", { href: ROOT + "post.html?id=" + encodeURIComponent(r.id) },
           h("div", { class: "row1" }, h("span", { class: "title", text: r.title }), r.has_image ? h("span", { class: "muted", title: "이미지 첨부" }, icon("image", 16)) : null),

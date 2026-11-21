@@ -5,12 +5,12 @@
   const form = $("write-form"), msg = $("form-msg"), btn = $("submit");
 
   NS.renderHeader("", { back: true });
-  // 답글 글 쓰기: write.html?reply_to=<글 id>
+  // 답글 쓰기: write.html?reply_to=<글 id>
   const rid = new URLSearchParams(location.search).get("reply_to") || "";
   const replyTo = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rid) ? rid.toLowerCase() : null;
   if (replyTo) {
-    document.querySelector("h1").textContent = "답글 글 쓰기";
-    document.title = "답글 글 쓰기 - 헛소리 대마왕";
+    document.querySelector("h1").textContent = "답글 쓰기";
+    document.title = "답글 쓰기 - 헛소리 대마왕";
     const box = h("div", { class: "reply-ctx", text: "원글을 불러오는 중…" });
     form.before(box);
     btn.disabled = true;

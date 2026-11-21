@@ -142,7 +142,7 @@
     not_found: "존재하지 않거나 볼 수 없는 항목입니다.",
     post_not_available: "삭제되었거나 숨겨진 글에는 댓글이나 답글을 달 수 없습니다.",
     reply_too_deep: "답글이 너무 깊게 이어졌습니다. 원글에 새 글로 써 주세요.",
-    has_replies: "답글 글이 달린 글은 영구 삭제할 수 없습니다. 삭제(숨김)로 처리해 주세요.",
+    has_replies: "답글이 달린 글은 영구 삭제할 수 없습니다. 삭제(숨김)로 처리해 주세요.",
     unsupported_image: "JPG, PNG, WebP 이미지만 올릴 수 있습니다.",
     invalid_file_size: "이미지는 1MB 이하여야 합니다.",
     too_large: "파일이 너무 큽니다. (1MB 이하)",
